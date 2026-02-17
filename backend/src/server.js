@@ -6,36 +6,18 @@ import { clerkMiddleware } from "@clerk/express";
 import { connectDB } from "./lib/db.js";
 import { inngest, functions } from "./lib/inngest.js";
 
-import chatRoutes from "./routes/chatRoutes.js";
-import sessionRoutes from "./routes/sessionRoute.js";
-
 const app = express();
 
-// --------------------
-// MIDDLEWARE
-// --------------------
 app.use(express.json());
-
-// Temporarily allow all origins (so Inngest works)
-// Later we can restrict this
 app.use(cors());
-
 app.use(clerkMiddleware());
 
-// --------------------
-// ROUTES
-// --------------------
 app.use("/api/inngest", serve({ client: inngest, functions }));
-app.use("/api/chat", chatRoutes);
-app.use("/api/sessions", sessionRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ msg: "api is up and running" });
 });
 
-// --------------------
-// START SERVER
-// --------------------
 const startServer = async () => {
   try {
     await connectDB();
@@ -51,4 +33,3 @@ const startServer = async () => {
 };
 
 startServer();
-
