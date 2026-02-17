@@ -1,10 +1,8 @@
 import express from "express";
-import path from "path";
 import cors from "cors";
 import { serve } from "inngest/express";
 import { clerkMiddleware } from "@clerk/express";
 
-import { ENV } from "./lib/env.js";
 import { connectDB } from "./lib/db.js";
 import { inngest, functions } from "./lib/inngest.js";
 
@@ -12,19 +10,15 @@ import chatRoutes from "./routes/chatRoutes.js";
 import sessionRoutes from "./routes/sessionRoute.js";
 
 const app = express();
-const __dirname = path.resolve();
 
 // --------------------
 // MIDDLEWARE
 // --------------------
 app.use(express.json());
 
-app.use(
-  cors({
-    origin: ENV.CLIENT_URL, // your frontend URL
-    credentials: true,
-  })
-);
+// Temporarily allow all origins (so Inngest works)
+// Later we can restrict this
+app.use(cors());
 
 app.use(clerkMiddleware());
 
@@ -40,26 +34,13 @@ app.get("/health", (req, res) => {
 });
 
 // --------------------
-// SERVE FRONTEND IN PRODUCTION
-// --------------------
-if (ENV.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
-
-  app.get("*", (req, res) => {
-    res.sendFile(
-      path.join(__dirname, "../frontend/dist/index.html")
-    );
-  });
-}
-
-// --------------------
 // START SERVER
 // --------------------
 const startServer = async () => {
   try {
     await connectDB();
 
-    const PORT = process.env.PORT || ENV.PORT || 3000;
+    const PORT = process.env.PORT || 3000;
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port: ${PORT}`);
@@ -70,3 +51,4 @@ const startServer = async () => {
 };
 
 startServer();
+
